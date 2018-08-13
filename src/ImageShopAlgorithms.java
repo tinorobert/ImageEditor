@@ -137,7 +137,113 @@ public class ImageShopAlgorithms implements ImageShopAlgorithmsInterface {
 	}
 
 	public GImage blur(GImage source) {
-		// TODO
-		return null;
+		
+		int[][] pixels = source.getPixelArray();
+		//int[][] pixels = {{1,2,3,4,5},{6,7,8,9,10},{11,12,13,14,15},{16,17,18,19,20}};
+		int x = pixels.length;
+		int y= pixels[0].length;
+		int red[][]= new int [x][y];
+		int green[][]= new int [x][y];
+		int blue[][]= new int [x][y];
+		
+		int result[][] = new int [x][y];
+		
+		for(int i=0; i<x; i++)
+			for(int j=0; j<y; j++) {
+				red[i][j] = GImage.getRed(pixels[i][j]);
+				green[i][j] = GImage.getGreen(pixels[i][j]);
+				blue[i][j] = GImage.getBlue(pixels[i][j]);
+			}
+		
+		int [][] redBlur = matrix(red);
+		int [][] greenBlur = matrix(green);
+		int [][] blueBlur = matrix(blue);
+		
+		
+		for(int i=0; i<x; i++)
+			for(int j=0; j<y; j++) {
+				result[i][j] = GImage.createRGBPixel(redBlur[i][j], greenBlur[i][j], blueBlur[i][j]);
+
+			}
+		
+		GImage img = new GImage(result);
+		
+		return img;
+	}
+	
+	
+	public int[][] matrix(int[][]pixels){
+		
+		int x = pixels.length;
+		int y= pixels[0].length;
+		int o,a,b,c,d,e,f,g,h;
+		int [][] blurs = new int [x][y];
+
+		
+		for(int i=0; i<x; i++)
+			for(int j=0; j<y; j++)
+			{
+				//int i=0,j=1;
+				o = pixels[i][j];
+				
+				if(i-1>=0 && j-1>=0) a=pixels[i-1][j-1];
+				else a=-1;
+
+				if(i-1>=0) b=pixels[i-1][j];
+				else b=-1;
+
+				if(i-1>=0 && j+1<y) c=pixels[i-1][j+1];
+				else c=-1;
+
+				if(j-1>=0) d=pixels[i][j-1];
+				else d=-1;
+
+				if(j+1<y) e=pixels[i][j+1];
+				else e=-1;
+				
+				if(i+1<x && j-1>=0) f=pixels[i+1][j-1];
+				else f=-1;
+				
+				if(i+1<x ) g=pixels[i+1][j];
+				else g=-1;
+				
+				if(i+1<x && j+1<y) h=pixels[i+1][j+1];
+				else h=-1;
+				
+				blurs[i][j] = mean(o,a,b,c,d,e,f,g,h);
+
+
+			}
+		
+		/*for(int i=0; i<x; i++) {
+			for(int j=0; j<y; j++)
+				System.out.print(blurs[i][j]+ " ");
+			
+			System.out.println();
+		}*/
+		
+		
+		return blurs;
+	}
+	
+	public int mean (int o, int a, int b, int c, int d, int e, int f, int g, int h) {
+		
+		int count =1, sum=o, ret;
+		
+		if(a!=-1)	{count++;sum+=a;}
+		if(b!=-1)	{count++;sum+=b;}
+		if(c!=-1)	{count++;sum+=c;}
+		if(d!=-1)	{count++;sum+=d;}
+		if(e!=-1)	{count++;sum+=e;}
+		if(f!=-1)	{count++;sum+=f;}
+		if(g!=-1)	{count++;sum+=g;}
+		if(h!=-1)	{count++;sum+=h;}
+
+		//sum = o+a+b+c+d+e+f+g+h;
+		ret = sum/count;
+		
+		//System.out.println(o + " " + a+b+c+d+e+f+g+h + ". count: " + count + "sum: " + sum + "m: "+ ret);
+		
+		return ret;
 	}
 }
