@@ -80,10 +80,150 @@ public class ImageShopAlgorithms implements ImageShopAlgorithmsInterface {
 	}
 
 	public GImage equalize(GImage source) {
-		// TODO
-		return null;
+		
+		//int x = pixels.length; 		//500
+		//int y = pixels[0].length;	//760
+		
+		int [][]lumi;
+		int [] cumu ;
+		int [] histo;
+		int [][] newPixels;
+		
+		
+		lumi = calcuLumi(source);
+		
+		histo = calcuHisto(lumi);
+			
+		//printHisto(histo);
+		
+		cumu = calcuCumu(histo);
+		
+		//printCumu(cumu);
+		
+		newPixels = calcuEqua(cumu, lumi);
+		
+		GImage img = new GImage(newPixels);
+		
+		//
+		lumi = calcuLumi(img);
+
+		histo = calcuHisto(lumi);
+
+		//printHisto(histo);
+
+		cumu = calcuCumu(histo);
+		
+		printCumu(cumu);
+		
+		return img;
 	}
 
+	
+	private int[][]calcuLumi(GImage source){
+		
+		int [][] pixels = source.getPixelArray();
+		int x = pixels.length; 		//500
+		int y = pixels[0].length;	//760
+		int [][]red = new int [x][y];
+		int [][]green = new int [x][y];
+		int [][]blue = new int [x][y];
+		int [][]lumi = new int [x][y];
+		
+		for(int i=0; i<x; i++)
+			for(int j=0; j<y; j++) {
+				
+				red[i][j] = source.getRed(pixels[i][j]);
+				green[i][j] = source.getGreen(pixels[i][j]);
+				blue[i][j] = source.getBlue(pixels[i][j]);
+				lumi[i][j] = computeLuminosity(red[i][j],green[i][j],blue[i][j]); 
+			}
+		
+		return lumi;
+	}
+	
+	private int[] calcuHisto(int[][] lumi) {
+		
+		int x= lumi.length;
+		int y= lumi[0].length;
+		int [] histo = new int[256];
+		
+		for(int k=0; k<256; k++)
+			for(int i=0; i<x; i++)
+				for(int j=0; j<y; j++) {
+					
+					if(lumi[i][j]==k)
+						histo[k]++;
+				}
+		
+		return histo;
+	}
+	
+
+	private void printHisto(int[]histo) {
+		for(int k=0; k<256; k++)
+		{
+			System.out.print(k + ": ");
+			for(int l=0; l<histo[k]; l+=100)
+				System.out.print("*");
+			System.out.println();
+
+		}
+		
+	}
+
+	
+	private void printCumu(int[]histo) {
+		for(int k=0; k<256; k++)
+		{
+			System.out.print(k + ": ");
+			for(int l=0; l<histo[k]; l+=1000)
+				System.out.print("*");
+			System.out.println();
+
+		}
+		
+	}
+	
+	
+	private int[] calcuCumu(int[]histo) {
+		
+		int []cumu = new int [256];
+		
+		cumu[0] = histo[0];
+		for(int k=1; k<256; k++)
+		{
+			cumu[k] = histo[k]+ cumu[k-1];
+
+		}
+		
+		return cumu;
+		
+	}
+	
+	int[][] calcuEqua(int[] cumu, int[][]lumi) {
+		
+		int[] equa = new int[256];
+		int numPix = cumu[255];
+		int newLumi;
+		int x= lumi.length;
+		int y= lumi[0].length;
+		int[][] newPixels = new int [x][y];
+		
+		for(int k=0; k<256; k++) 
+			equa[k]= cumu[k]*255/numPix;
+			
+		for(int i=0; i<x; i++)
+			for(int j=0; j<y; j++)
+			{
+				newLumi = equa[lumi[i][j]];
+				newPixels[i][j] = GImage.createRGBPixel(newLumi, newLumi, newLumi) ;
+			}
+		
+		
+		return newPixels;
+		
+	}
+	
 	public GImage negative(GImage source) {
 		// TODO
 		return null;
